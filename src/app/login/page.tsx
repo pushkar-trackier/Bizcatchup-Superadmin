@@ -9,12 +9,18 @@ import { useAuth } from "@/lib/auth/auth-context";
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [email, setEmail] = useState("admin@bizcatchup.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    login(email);
+    setError(null);
+    setIsSubmitting(true);
+    const result = await login(email, password);
+    setIsSubmitting(false);
+    if (!result.ok) setError(result.error);
   }
 
   return (
@@ -25,13 +31,20 @@ export default function LoginPage() {
             B
           </div>
           <CardTitle>BizCatchup Super Admin</CardTitle>
-          <CardDescription>Sign in to continue. (Demo login — no real credentials yet.)</CardDescription>
+          <CardDescription>Sign in with your admin account.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                required
+              />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">Password</Label>
@@ -40,11 +53,13 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Anything works for now"
+                autoComplete="current-password"
+                required
               />
             </div>
-            <Button type="submit" className="mt-2">
-              Sign in
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="mt-2" disabled={isSubmitting}>
+              {isSubmitting ? "Signing in…" : "Sign in"}
             </Button>
           </form>
         </CardContent>

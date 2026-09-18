@@ -38,11 +38,16 @@ export interface TeamDirectoryRow {
   memberLimit: number;
 }
 
+/**
+ * A metric is `null` when no backend data source exists for it yet (see
+ * plan's "flagged for backend-wiring" section) — the UI renders that as
+ * "Not available yet" instead of a fabricated number.
+ */
 export interface DashboardStats {
-  teamsCount: number;
-  teamMembersCount: number;
-  cardsCount: number;
-  monthlyScans: number;
-  paidCount: number;
-  freeCount: number;
+  teamsCount: number | null;
+  teamMembersCount: number | null;
+  cardsCount: number | null;
+  monthlyScans: number | null;
+  paidCount: number | null;
+  freeCount: number | null;
 }

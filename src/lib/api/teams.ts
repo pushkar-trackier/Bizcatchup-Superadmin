@@ -31,17 +31,18 @@ async function mockListTeams(p: Required<Omit<ListTeamsParams, "status">> & { st
 }
 
 export async function listTeams(p: ListTeamsParams = {}): Promise<ListTeamsResponse> {
-  const params = {
-    limit: p.limit ?? 10,
-    offset: p.offset ?? 0,
-    orderBy: p.orderBy ?? "createdAt",
-    orderByAsc: p.orderByAsc ?? false,
-    search: p.search ?? "",
-    status: p.status,
-  };
+  const limit = p.limit ?? 10;
+  const offset = p.offset ?? 0;
+  const orderBy = p.orderBy ?? "createdAt";
+  const orderByAsc = p.orderByAsc ?? false;
+  const search = p.search ?? "";
 
-  if (USE_MOCKS) return mockListTeams(params);
-  return http<ListTeamsResponse>("/v1.0/teams", { query: params });
+  if (USE_MOCKS) {
+    return mockListTeams({ limit, offset, orderBy, orderByAsc, search, status: p.status });
+  }
+
+  // `status` is mock-only (no backend field yet, see plan) — not sent to the real endpoint.
+  return http<ListTeamsResponse>("/v1.0/teams", { query: { limit, offset, orderBy, orderByAsc, search } });
 }
 
 export async function updateTeamLimits(teamID: string, updates: AppConfigUpdateItem[]): Promise<void> {

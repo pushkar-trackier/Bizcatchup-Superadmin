@@ -2,6 +2,9 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { setTokenGetter, http } from "@/lib/api/client";
 
 export interface AdminSession {
   name: string;
@@ -10,25 +13,39 @@ export interface AdminSession {
 }
 
 const SESSION_COOKIE = "bc_admin_session";
-const SESSION_STORAGE_KEY = "bc_admin_session";
 
 interface AuthContextValue {
   session: AdminSession | null;
   isLoading: boolean;
-  login: (email: string) => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readStoredSession(): AdminSession | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AdminSession) : null;
-  } catch {
-    return null;
+function toSession(user: User): AdminSession {
+  return {
+    name: user.displayName ?? user.email ?? "Super Admin",
+    role: "Administrator",
+    email: user.email ?? "",
+  };
+}
+
+function setSessionCookie(present: boolean) {
+  document.cookie = present
+    ? `${SESSION_COOKIE}=1; path=/; max-age=86400`
+    : `${SESSION_COOKIE}=; path=/; max-age=0`;
+}
+
+function firebaseErrorMessage(err: unknown): string {
+  const code = (err as { code?: string } | undefined)?.code ?? "";
+  if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+    return "Incorrect email or password.";
   }
+  if (code === "auth/too-many-requests") {
+    return "Too many attempts. Try again in a bit.";
+  }
+  return "Sign-in failed. Please try again.";
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -37,33 +54,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // localStorage is only reachable on the client, so this can't be a lazy
-    // useState initializer without a server/client hydration mismatch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSession(readStoredSession());
-    setIsLoading(false);
+    // Bridges the real Firebase ID token into the api client without api/*
+    // modules ever importing firebase directly.
+    setTokenGetter(async () => (auth.currentUser ? auth.currentUser.getIdToken() : null));
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setSession(user ? toSession(user) : null);
+      setSessionCookie(!!user);
+      setIsLoading(false);
+    });
+
+    return unsubscribe;
   }, []);
 
-  function login(email: string) {
-    const next: AdminSession = { name: "Super Admin", role: "Administrator", email };
-    document.cookie = `${SESSION_COOKIE}=mock; path=/; max-age=86400`;
+  async function login(email: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
     try {
-      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // localStorage can throw in private browsing — the cookie gate still works.
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+
+      // The backend re-validates the admin email domain on every request
+      // regardless, but checking once up front gives an immediate, clear
+      // error instead of a confusing trail of failed API calls.
+      try {
+        await http("/v1.0/check-admin");
+      } catch {
+        await signOut(auth);
+        return { ok: false, error: "This account is not authorized as an admin." };
+      }
+
+      void credential; // session state updates via onAuthStateChanged
+      router.push("/");
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: firebaseErrorMessage(err) };
     }
-    setSession(next);
-    router.push("/");
   }
 
-  function logout() {
-    document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0`;
-    try {
-      window.localStorage.removeItem(SESSION_STORAGE_KEY);
-    } catch {
-      // see above
-    }
-    setSession(null);
+  async function logout() {
+    await signOut(auth);
     router.push("/login");
   }
 

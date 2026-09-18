@@ -1,14 +1,17 @@
 import { getMockCards } from "@/lib/mock/cards.mock";
 import { PAID_TEAM_COUNT, TEAM_COUNT, getMockTeams } from "@/lib/mock/teams.mock";
 import type { DashboardStats } from "@/lib/types/view";
-import { USE_MOCKS, http } from "./client";
+import { listCards } from "./cards";
+import { USE_MOCKS } from "./client";
+import { listTeams } from "./teams";
 
 /**
- * NO BACKEND EQUIVALENT EXISTS (see plan's "flagged for backend-wiring" section).
- * Kept as a single function so the future real endpoint is a one-line swap here.
- * The real backend can cheaply supply teamsCount/cardsCount today via totalCount
- * from two 1-row list calls; teamMembersCount, monthlyScans and paidCount/freeCount
- * currently have no data source at all.
+ * No single backend endpoint exists for this (see plan's "flagged for
+ * backend-wiring" section: needs a new GET /v1.0/admin/stats). In real mode
+ * teamsCount/cardsCount are composed cheaply from two 1-row list calls (their
+ * `totalCount` comes from a real Firestore aggregation); teamMembersCount,
+ * monthlyScans and paidCount/freeCount have no data source at all yet and
+ * come back null — the dashboard renders those as "Not available yet".
  */
 export async function getDashboardStats(): Promise<DashboardStats> {
   if (USE_MOCKS) {
@@ -31,5 +34,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     };
   }
 
-  return http<DashboardStats>("/v1.0/admin/stats");
+  const [teamsRes, cardsRes] = await Promise.all([listTeams({ limit: 1 }), listCards({ limit: 1 })]);
+
+  return {
+    teamsCount: teamsRes.totalCount,
+    cardsCount: cardsRes.totalCount,
+    teamMembersCount: null,
+    monthlyScans: null,
+    paidCount: null,
+    freeCount: null,
+  };
 }

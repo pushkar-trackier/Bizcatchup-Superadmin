@@ -47,41 +47,31 @@ export default function DashboardPage() {
 
   const stats = statsQuery.data;
 
+  function metric(value: number | null | undefined, caption: string): { value: string; caption: string } {
+    if (statsQuery.isLoading) return { value: "—", caption };
+    if (value === null || value === undefined) return { value: "—", caption: "Not available yet" };
+    return { value: formatNumber(value), caption };
+  }
+
+  const teamsStat = metric(stats?.teamsCount, "All registered teams");
+  const membersStat = metric(stats?.teamMembersCount, "Across active teams");
+  const cardsStat = metric(stats?.cardsCount, "Digitized contacts");
+  const scansStat = metric(stats?.monthlyScans, "Current month scans");
+  const paidFreeStat =
+    stats && stats.paidCount !== null && stats.freeCount !== null
+      ? { value: `${formatNumber(stats.paidCount)} / ${formatNumber(stats.freeCount)}`, caption: "Premium vs free teams" }
+      : { value: "—", caption: statsQuery.isLoading ? "Premium vs free teams" : "Not available yet" };
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader title="Dashboard" breadcrumb={[{ label: "Dashboard" }, { label: "Home" }]} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <StatCard
-          icon={Building2}
-          label="Teams"
-          value={stats ? formatNumber(stats.teamsCount) : "—"}
-          caption="All registered teams"
-        />
-        <StatCard
-          icon={Users}
-          label="Team members"
-          value={stats ? formatNumber(stats.teamMembersCount) : "—"}
-          caption="Across active teams"
-        />
-        <StatCard
-          icon={Contact}
-          label="Business cards"
-          value={stats ? formatNumber(stats.cardsCount) : "—"}
-          caption="Digitized contacts"
-        />
-        <StatCard
-          icon={ScanLine}
-          label="Monthly scans"
-          value={stats ? formatNumber(stats.monthlyScans) : "—"}
-          caption="Current month scans"
-        />
-        <StatCard
-          icon={Crown}
-          label="Paid / Free"
-          value={stats ? `${formatNumber(stats.paidCount)} / ${formatNumber(stats.freeCount)}` : "—"}
-          caption="Premium vs free teams"
-        />
+        <StatCard icon={Building2} label="Teams" value={teamsStat.value} caption={teamsStat.caption} />
+        <StatCard icon={Users} label="Team members" value={membersStat.value} caption={membersStat.caption} />
+        <StatCard icon={Contact} label="Business cards" value={cardsStat.value} caption={cardsStat.caption} />
+        <StatCard icon={ScanLine} label="Monthly scans" value={scansStat.value} caption={scansStat.caption} />
+        <StatCard icon={Crown} label="Paid / Free" value={paidFreeStat.value} caption={paidFreeStat.caption} />
       </div>
 
       <DataTableCard
