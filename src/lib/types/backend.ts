@@ -88,6 +88,21 @@ export interface AppConfigUpdateItem {
   configValue: number;
 }
 
+/**
+ * GET /v1.0/admin/stats. teamMembersCount/paidCount/freeCount are always
+ * null today — no backend data source exists for them yet (see the plan's
+ * "flagged for backend-wiring" section) — render that as "Not available
+ * yet", never fabricate a number.
+ */
+export interface AdminStatsResponse {
+  teamsCount: number | null;
+  cardsCount: number | null;
+  monthlyScans: number | null;
+  teamMembersCount: number | null;
+  paidCount: number | null;
+  freeCount: number | null;
+}
+
 export const LIMIT_KEYS = {
   dailyScanLimit: "dailyScanLimit",
   totalScanLimit: "totalScanLimit",
