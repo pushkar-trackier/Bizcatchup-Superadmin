@@ -6,7 +6,7 @@ import { USE_MOCKS, http } from "./client";
 export interface ListCardsParams {
   limit?: number;
   offset?: number;
-  orderBy?: "created_at" | "name";
+  orderBy?: "created_at" | "updated_at" | "name";
   orderByAsc?: boolean;
   search?: string;
 }
@@ -16,7 +16,11 @@ async function mockListCards(p: Required<ListCardsParams>): Promise<ListCardsRes
 
   const result = await paginate(all, p, {
     match: (card, q) => card.ContactNames.toLowerCase().includes(q) || card.CompanyNames.toLowerCase().includes(q),
-    sortKey: (card, orderBy) => (orderBy === "name" ? card.ContactNames.toLowerCase() : card.created_at),
+    sortKey: (card, orderBy) => {
+      if (orderBy === "name") return card.ContactNames.toLowerCase();
+      if (orderBy === "updated_at") return card.updated_at;
+      return card.created_at;
+    },
   });
 
   return { cards: result.items, totalCount: result.totalCount };

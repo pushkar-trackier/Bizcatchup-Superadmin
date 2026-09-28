@@ -18,8 +18,13 @@ import { updateTeamLimits } from "@/lib/api/teams";
 import { LIMIT_KEYS } from "@/lib/types/backend";
 import type { TeamDirectoryRow } from "@/lib/types/view";
 
+/** Only what this dialog actually reads/writes — lets callers pass a
+ * TeamDirectoryRow (Manage Teams) or a plain TeamRow (Team List) without
+ * fabricating fields (cardCount, status, …) the dialog never uses. */
+export type TeamLimitsEditable = Pick<TeamDirectoryRow, "id" | "name" | "dailyLimit" | "totalLimit" | "memberLimit">;
+
 interface TeamLimitsDialogProps {
-  team: TeamDirectoryRow | null;
+  team: TeamLimitsEditable | null;
   onOpenChange: (open: boolean) => void;
 }
 

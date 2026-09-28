@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Contact, Crown, ScanLine, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { DataTableCard, type Column } from "@/components/data-table-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/stat-card";
@@ -78,6 +80,7 @@ export default function DashboardPage() {
         eyebrow="Latest activity"
         title="Recently active teams"
         total={teamsQuery.data?.totalCount}
+        action={<Button variant="outline" size="sm" nativeButton={false} render={<Link href="/teams">Details</Link>} />}
         loading={teamsQuery.isLoading}
         columns={teamColumns}
         rows={(teamsQuery.data?.teams ?? []).map(toTeamRow)}
@@ -88,6 +91,7 @@ export default function DashboardPage() {
         eyebrow="Latest activity"
         title="Recently created cards"
         total={cardsQuery.data?.totalCount}
+        action={<Button variant="outline" size="sm" nativeButton={false} render={<Link href="/cards">Details</Link>} />}
         loading={cardsQuery.isLoading}
         columns={cardColumns}
         rows={(cardsQuery.data?.cards ?? []).map(toCardRow)}

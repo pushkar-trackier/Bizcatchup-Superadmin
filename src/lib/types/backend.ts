@@ -42,6 +42,9 @@ export interface BackendTeam {
   invitees: BackendInvitation[];
   /** merged team-override + global defaults, e.g. dailyScanLimit, totalScanLimit, team_member_limit */
   limits: Record<string, number>;
+  /** Live per-team card count, maintained on the backend at every card
+   * create/delete site — real data now (previously hardcoded to 0 here). */
+  cardCount: number;
 }
 
 export interface ListTeamsResponse {

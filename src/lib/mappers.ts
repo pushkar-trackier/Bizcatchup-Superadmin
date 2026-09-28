@@ -1,5 +1,5 @@
 import { LIMIT_KEYS, type BackendCard, type BackendTeam } from "@/lib/types/backend";
-import type { CardRow, TeamDirectoryRow, TeamRow, TeamStatus } from "@/lib/types/view";
+import type { CardDetailRow, CardRow, TeamDirectoryRow, TeamRow, TeamStatus } from "@/lib/types/view";
 
 export const N_A = "N/A";
 export const EM_DASH = "—";
@@ -7,6 +7,14 @@ export const EM_DASH = "—";
 function firstOr(arr: string[] | undefined, fallback: string): string {
   const value = arr?.[0]?.trim();
   return value ? value : fallback;
+}
+
+/** Joins every value in the array (not just the first) — used on the Card
+ * Details page, which has room to show all work phones/emails rather than
+ * just one. */
+function joinOr(arr: string[] | undefined, fallback: string): string {
+  const values = arr?.map((v) => v.trim()).filter(Boolean) ?? [];
+  return values.length ? values.join(", ") : fallback;
 }
 
 function stringOr(value: string | undefined, fallback: string): string {
@@ -49,15 +57,26 @@ export function toCardRow(card: BackendCard): CardRow {
   };
 }
 
+export function toCardDetailRow(card: BackendCard): CardDetailRow {
+  return {
+    id: card.id,
+    imageUrl: card.image_url?.[0]?.trim() || null,
+    contact: stringOr(card.ContactNames, EM_DASH),
+    jobTitle: stringOr(card.JobTitles, N_A),
+    workPhones: joinOr(card.WorkPhones, N_A),
+    company: stringOr(card.CompanyNames, N_A),
+    email: joinOr(card.Emails, N_A),
+    website: stringOr(card.Websites, EM_DASH),
+    updatedAt: card.updated_at,
+  };
+}
+
 /**
  * Team status has no backend field yet (see plan). This phase derives it from a
  * mock-only status the seed generator attaches; real teams default to "active"
  * since the backend has no concept of suspension today.
  */
-export function toTeamDirectoryRow(
-  team: BackendTeam,
-  extra: { cardCount: number; status: TeamStatus },
-): TeamDirectoryRow {
+export function toTeamDirectoryRow(team: BackendTeam, extra: { status: TeamStatus }): TeamDirectoryRow {
   const owner =
     team.members?.find((m) => m.role === "owner") ??
     team.members?.find((m) => m.id === team.ownerID);
@@ -68,7 +87,7 @@ export function toTeamDirectoryRow(
     ownerName: stringOr(owner?.name, N_A),
     ownerEmail: stringOr(owner?.email ?? team.emails?.[0], N_A),
     memberCount: memberCountOf(team),
-    cardCount: extra.cardCount,
+    cardCount: team.cardCount ?? 0,
     status: extra.status,
     createdAt: team.createdAt,
     dailyLimit: limitOf(team, LIMIT_KEYS.dailyScanLimit),

@@ -66,6 +66,10 @@ function buildTeam(index: number): MockTeam {
       { weight: 9, value: "active" },
       { weight: 1, value: "inactive" },
     ]),
+    // Independent of cards.mock's own card generation (importing that here
+    // would create a teams.mock <-> cards.mock circular import) — fine for
+    // mock/preview purposes, doesn't need to reconcile exactly.
+    cardCount: faker.number.int({ min: 0, max: 800 }),
   };
 }
 

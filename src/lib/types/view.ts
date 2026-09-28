@@ -21,6 +21,22 @@ export interface CardRow {
   groups: number;
 }
 
+/** Row for the full Card Details page (/cards) — no groups/scannedBy/role:
+ * groups was dropped by request, and scannedBy/role have no backend field
+ * at all (business cards don't record who scanned them or that person's
+ * team role) — see the plan's "flagged for backend-wiring" section. */
+export interface CardDetailRow {
+  id: string;
+  imageUrl: string | null;
+  contact: string;
+  jobTitle: string;
+  workPhones: string;
+  company: string;
+  email: string;
+  website: string;
+  updatedAt: string;
+}
+
 export type TeamStatus = "active" | "inactive";
 
 export interface TeamDirectoryRow {
