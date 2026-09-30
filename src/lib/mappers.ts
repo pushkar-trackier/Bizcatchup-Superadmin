@@ -67,7 +67,11 @@ export function toCardDetailRow(card: BackendCard): CardDetailRow {
     company: stringOr(card.CompanyNames, N_A),
     email: joinOr(card.Emails, N_A),
     website: stringOr(card.Websites, EM_DASH),
+    createdAt: card.created_at,
     updatedAt: card.updated_at,
+    scannedBy: stringOr(card.scannedByName, "") || stringOr(card.scannedByEmail, "") || stringOr(card.user_id, EM_DASH),
+    scannedByEmail: card.scannedByName?.trim() ? card.scannedByEmail?.trim() || null : null,
+    scannedByRole: stringOr(card.scannedByRole, EM_DASH),
   };
 }
 

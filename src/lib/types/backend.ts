@@ -75,6 +75,12 @@ export interface BackendCard {
   labels: string[];
   image_url: string[];
   status: string;
+  /** Resolved server-side from user_id against the card's team's *current*
+   * members — empty string when the scanner is no longer on that team (then
+   * fall back to user_id). Only present on GET /v1.0/cards. */
+  scannedByName?: string;
+  scannedByEmail?: string;
+  scannedByRole?: string;
 }
 
 export interface ListCardsResponse {

@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DataTableCard, type Column } from "@/components/data-table-card";
@@ -198,43 +199,58 @@ export default function ManageTeamsPage() {
               setOffset(0);
             }}
           />
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Select value={plan} onValueChange={resetToFirstPage<PlanFilter>(setPlan, "all")}>
-              <SelectTrigger className="sm:w-40">
-                <SelectValue placeholder="All Plans" />
-              </SelectTrigger>
-              <SelectContent>
-                {PLAN_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={members} onValueChange={resetToFirstPage<MembersFilter>(setMembers, "all")}>
-              <SelectTrigger className="sm:w-40">
-                <SelectValue placeholder="Members" />
-              </SelectTrigger>
-              <SelectContent>
-                {MEMBERS_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={created} onValueChange={resetToFirstPage<CreatedFilter>(setCreated, "all")}>
-              <SelectTrigger className="sm:w-40">
-                <SelectValue placeholder="Created" />
-              </SelectTrigger>
-              <SelectContent>
-                {CREATED_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="filter-plan" className="text-xs text-muted-foreground">
+                Plan
+              </Label>
+              <Select value={plan} onValueChange={resetToFirstPage<PlanFilter>(setPlan, "all")}>
+                <SelectTrigger id="filter-plan" className="sm:w-40">
+                  <SelectValue placeholder="All Plans" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLAN_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="filter-members" className="text-xs text-muted-foreground">
+                Members
+              </Label>
+              <Select value={members} onValueChange={resetToFirstPage<MembersFilter>(setMembers, "all")}>
+                <SelectTrigger id="filter-members" className="sm:w-40">
+                  <SelectValue placeholder="Members" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MEMBERS_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="filter-created" className="text-xs text-muted-foreground">
+                Created
+              </Label>
+              <Select value={created} onValueChange={resetToFirstPage<CreatedFilter>(setCreated, "all")}>
+                <SelectTrigger id="filter-created" className="sm:w-40">
+                  <SelectValue placeholder="Created" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CREATED_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button variant="outline" onClick={() => exportRowsToCsv(rows)} className="sm:ml-auto">
               <Download className="size-4" />
               Export CSV

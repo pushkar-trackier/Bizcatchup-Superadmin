@@ -34,7 +34,15 @@ export interface CardDetailRow {
   company: string;
   email: string;
   website: string;
+  /** created_at — when the card was scanned. */
+  createdAt: string;
   updatedAt: string;
+  /** Scanner's name (falls back to email, then the raw user_id if they're no longer on the team). */
+  scannedBy: string;
+  /** Scanner's email, only when resolved — shown under the name. */
+  scannedByEmail: string | null;
+  /** Scanner's current team role, "—" when unresolved. */
+  scannedByRole: string;
 }
 
 export type TeamStatus = "active" | "inactive";
