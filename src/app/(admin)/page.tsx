@@ -8,9 +8,14 @@ import { DataTableCard, type Column } from "@/components/data-table-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { QueryError } from "@/components/query-error";
 import { StatCard } from "@/components/stat-card";
+import { ColumnChart } from "@/components/charts/column-chart";
+import { DonutChart } from "@/components/charts/donut-chart";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { listCards } from "@/lib/api/cards";
 import { queryKeys } from "@/lib/api/query-keys";
 import { getDashboardStats } from "@/lib/api/stats";
+import { getMonthlyTrend, getPlanMix } from "@/lib/api/trends";
 import { listTeams } from "@/lib/api/teams";
 import { formatDate, formatNumber } from "@/lib/format";
 import { toCardRow, toTeamRow } from "@/lib/mappers";
@@ -48,7 +53,11 @@ export default function DashboardPage() {
     queryFn: () => listCards({ limit: 5, orderBy: "created_at", orderByAsc: false }),
   });
 
+  const trendQuery = useQuery({ queryKey: queryKeys.monthlyTrend(6), queryFn: () => getMonthlyTrend(6) });
+  const planMixQuery = useQuery({ queryKey: queryKeys.planMix(), queryFn: getPlanMix });
+
   const stats = statsQuery.data;
+  const trend = trendQuery.data;
 
   function metric(value: number | null | undefined, caption: string): { value: string; caption: string } {
     if (statsQuery.isLoading) return { value: "—", caption };
@@ -81,11 +90,102 @@ export default function DashboardPage() {
       {statsQuery.isError && <QueryError error={statsQuery.error} onRetry={() => statsQuery.refetch()} />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <StatCard icon={Building2} label="Teams" value={teamsStat.value} caption={teamsStat.caption} />
-        <StatCard icon={Users} label="Team members" value={membersStat.value} caption={membersStat.caption} />
-        <StatCard icon={Contact} label="Business cards" value={cardsStat.value} caption={cardsStat.caption} />
-        <StatCard icon={ScanLine} label="Monthly scans" value={scansStat.value} caption={scansStat.caption} />
-        <StatCard icon={Crown} label="Paid / Free" value={paidFreeStat.value} caption={paidFreeStat.caption} />
+        <StatCard
+          icon={Building2}
+          label="Teams"
+          value={teamsStat.value}
+          caption={teamsStat.caption}
+          loading={statsQuery.isLoading}
+          delta={trend?.teamsDelta}
+        />
+        <StatCard
+          icon={Users}
+          label="Team members"
+          value={membersStat.value}
+          caption={membersStat.caption}
+          loading={statsQuery.isLoading}
+        />
+        <StatCard
+          icon={Contact}
+          label="Business cards"
+          value={cardsStat.value}
+          caption={cardsStat.caption}
+          loading={statsQuery.isLoading}
+          delta={trend?.cardsDelta}
+        />
+        <StatCard
+          icon={ScanLine}
+          label="Monthly scans"
+          value={scansStat.value}
+          caption={scansStat.caption}
+          loading={statsQuery.isLoading}
+        />
+        <StatCard
+          icon={Crown}
+          label="Paid / Free"
+          value={paidFreeStat.value}
+          caption={paidFreeStat.caption}
+          loading={statsQuery.isLoading}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Last 6 months</div>
+            <div className="text-lg font-semibold">Cards scanned per month</div>
+          </CardHeader>
+          <CardContent>
+            {trendQuery.isLoading && <Skeleton className="h-52 w-full" />}
+            {!trendQuery.isLoading && trendQuery.isError && (
+              <QueryError error={trendQuery.error} onRetry={() => trendQuery.refetch()} />
+            )}
+            {!trendQuery.isLoading && !trendQuery.isError && trend && (
+              <ColumnChart
+                points={trend.points.map((p) => ({ key: p.key, label: p.label, value: p.cards }))}
+                valueLabel="cards"
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Composition</div>
+            <div className="text-lg font-semibold">Teams by plan</div>
+          </CardHeader>
+          <CardContent>
+            {planMixQuery.isLoading && <Skeleton className="h-52 w-full" />}
+            {!planMixQuery.isLoading && planMixQuery.isError && (
+              <QueryError error={planMixQuery.error} onRetry={() => planMixQuery.refetch()} />
+            )}
+            {!planMixQuery.isLoading && !planMixQuery.isError && planMixQuery.data && (
+              <DonutChart
+                slices={planMixQuery.data.map((s) => ({ key: s.plan, label: s.label, value: s.count }))}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">Last 6 months</div>
+            <div className="text-lg font-semibold">Teams created per month</div>
+          </CardHeader>
+          <CardContent>
+            {trendQuery.isLoading && <Skeleton className="h-52 w-full" />}
+            {!trendQuery.isLoading && trendQuery.isError && (
+              <QueryError error={trendQuery.error} onRetry={() => trendQuery.refetch()} />
+            )}
+            {!trendQuery.isLoading && !trendQuery.isError && trend && (
+              <ColumnChart
+                points={trend.points.map((p) => ({ key: p.key, label: p.label, value: p.teams }))}
+                colorVar="--chart-3"
+                valueLabel="teams"
+              />
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <DataTableCard
