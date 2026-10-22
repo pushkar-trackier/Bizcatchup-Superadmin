@@ -6,6 +6,7 @@ import { Building2, Contact, Crown, ScanLine, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableCard, type Column } from "@/components/data-table-card";
 import { PageHeader } from "@/components/layout/page-header";
+import { QueryError } from "@/components/query-error";
 import { StatCard } from "@/components/stat-card";
 import { listCards } from "@/lib/api/cards";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -51,6 +52,8 @@ export default function DashboardPage() {
 
   function metric(value: number | null | undefined, caption: string): { value: string; caption: string } {
     if (statsQuery.isLoading) return { value: "—", caption };
+    // A failed load must not read like a backend gap or a zero.
+    if (statsQuery.isError) return { value: "—", caption: "Couldn't load" };
     if (value === null || value === undefined) return { value: "—", caption: "Not available yet" };
     return { value: formatNumber(value), caption };
   }
@@ -62,11 +65,20 @@ export default function DashboardPage() {
   const paidFreeStat =
     stats && stats.paidCount !== null && stats.freeCount !== null
       ? { value: `${formatNumber(stats.paidCount)} / ${formatNumber(stats.freeCount)}`, caption: "Premium vs free teams" }
-      : { value: "—", caption: statsQuery.isLoading ? "Premium vs free teams" : "Not available yet" };
+      : {
+          value: "—",
+          caption: statsQuery.isLoading
+            ? "Premium vs free teams"
+            : statsQuery.isError
+              ? "Couldn't load"
+              : "Not available yet",
+        };
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <PageHeader title="Dashboard" breadcrumb={[{ label: "Dashboard" }, { label: "Home" }]} />
+
+      {statsQuery.isError && <QueryError error={statsQuery.error} onRetry={() => statsQuery.refetch()} />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard icon={Building2} label="Teams" value={teamsStat.value} caption={teamsStat.caption} />
@@ -82,6 +94,8 @@ export default function DashboardPage() {
         total={teamsQuery.data?.totalCount}
         action={<Button variant="outline" size="sm" nativeButton={false} render={<Link href="/teams">Details</Link>} />}
         loading={teamsQuery.isLoading}
+        error={teamsQuery.error}
+        onRetry={() => teamsQuery.refetch()}
         columns={teamColumns}
         rows={(teamsQuery.data?.teams ?? []).map(toTeamRow)}
         rowKey={(r) => r.id}
@@ -93,6 +107,8 @@ export default function DashboardPage() {
         total={cardsQuery.data?.totalCount}
         action={<Button variant="outline" size="sm" nativeButton={false} render={<Link href="/cards">Details</Link>} />}
         loading={cardsQuery.isLoading}
+        error={cardsQuery.error}
+        onRetry={() => cardsQuery.refetch()}
         columns={cardColumns}
         rows={(cardsQuery.data?.cards ?? []).map(toCardRow)}
         rowKey={(r) => r.id}

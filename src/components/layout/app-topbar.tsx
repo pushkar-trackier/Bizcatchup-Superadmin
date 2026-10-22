@@ -14,16 +14,24 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { useSidebar } from "./sidebar-context";
 
 export function AppTopbar() {
-  const { toggle } = useSidebar();
+  const { toggle, toggleMobile } = useSidebar();
   const { session, logout } = useAuth();
+
+  const triggerClass = "text-navy-foreground hover:bg-white/10 hover:text-navy-foreground";
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b bg-navy px-4 text-navy-foreground">
+      {/* Below md the rail is replaced by an overlay drawer, so the same
+          control has to open a different thing. */}
+      <Button variant="ghost" size="icon" onClick={toggleMobile} aria-label="Open navigation" className={`md:hidden ${triggerClass}`}>
+        <PanelLeft className="size-5" />
+      </Button>
       <Button
         variant="ghost"
         size="icon"
         onClick={toggle}
-        className="text-navy-foreground hover:bg-white/10 hover:text-navy-foreground"
+        aria-label="Toggle sidebar"
+        className={`hidden md:inline-flex ${triggerClass}`}
       >
         <PanelLeft className="size-5" />
       </Button>

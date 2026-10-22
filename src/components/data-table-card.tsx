@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { QueryError } from "@/components/query-error";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,6 +22,8 @@ interface DataTableCardProps<T> {
   rows: T[];
   rowKey: (row: T) => string;
   loading?: boolean;
+  error?: unknown;
+  onRetry?: () => void;
   emptyLabel?: string;
   footer?: ReactNode;
 }
@@ -34,6 +37,8 @@ export function DataTableCard<T>({
   rows,
   rowKey,
   loading,
+  error,
+  onRetry,
   emptyLabel = "No results",
   footer,
 }: DataTableCardProps<T>) {
@@ -45,7 +50,7 @@ export function DataTableCard<T>({
           <div className="text-lg font-semibold">{title}</div>
         </div>
         <div className="flex items-center gap-3">
-          {total !== undefined && (
+          {total !== undefined && error == null && (
             <span className="text-sm text-muted-foreground">
               Total: <span className="font-medium text-foreground">{formatNumber(total)}</span>
             </span>
@@ -80,7 +85,15 @@ export function DataTableCard<T>({
                   </TableRow>
                 ))}
 
-              {!loading && rows.length === 0 && (
+              {!loading && error != null && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={columns.length} className="p-4">
+                    <QueryError error={error} onRetry={onRetry} />
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!loading && error == null && rows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="py-10 text-center text-muted-foreground">
                     {emptyLabel}
@@ -89,6 +102,7 @@ export function DataTableCard<T>({
               )}
 
               {!loading &&
+                error == null &&
                 rows.map((row) => (
                   <TableRow key={rowKey(row)}>
                     {columns.map((col) => (

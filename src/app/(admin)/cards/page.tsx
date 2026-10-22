@@ -186,6 +186,8 @@ export default function CardDetailsPage() {
           </Button>
         }
         loading={query.isLoading}
+        error={query.error}
+        onRetry={() => query.refetch()}
         columns={columns}
         rows={rows}
         rowKey={(r) => r.id}

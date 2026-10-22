@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/layout/page-header";
+import { QueryError } from "@/components/query-error";
 import { PaginationBar } from "@/components/pagination-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TeamLimitsDialog } from "@/components/team-limits-dialog";
@@ -144,21 +145,28 @@ export default function TeamListPage() {
         </CardContent>
       </Card>
 
-      <div className="text-sm text-muted-foreground">
-        Showing {teams.length} of {totalCount} teams
-      </div>
+      {!query.isError && (
+        <div className="text-sm text-muted-foreground">
+          Showing {teams.length} of {totalCount} teams
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         {query.isLoading &&
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={`skeleton-${i}`} className="h-40 w-full rounded-lg" />)}
 
-        {!query.isLoading && teams.length === 0 && (
+        {!query.isLoading && query.isError && (
+          <QueryError error={query.error} onRetry={() => query.refetch()} />
+        )}
+
+        {!query.isLoading && !query.isError && teams.length === 0 && (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">No teams found</CardContent>
           </Card>
         )}
 
         {!query.isLoading &&
+          !query.isError &&
           teams.map((team) => (
             <TeamListCard
               key={team.id}

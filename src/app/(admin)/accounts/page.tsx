@@ -264,6 +264,8 @@ export default function ManageTeamsPage() {
         title="All teams"
         total={query.data?.totalCount}
         loading={query.isLoading}
+        error={query.error}
+        onRetry={() => query.refetch()}
         columns={columns}
         rows={rows}
         rowKey={(r) => r.id}
