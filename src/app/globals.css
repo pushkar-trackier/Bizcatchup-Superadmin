@@ -7,6 +7,25 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sidebar-surface: var(--sidebar-surface);
+  --color-sidebar-surface-active: var(--sidebar-surface-active);
+  --color-sidebar-surface-foreground: var(--sidebar-surface-foreground);
+  --color-sidebar-surface-muted: var(--sidebar-surface-muted);
+  --color-sidebar-rule: var(--sidebar-rule);
+  --color-tone-good-bg: var(--tone-good-bg);
+  --color-tone-good-fg: var(--tone-good-fg);
+  --color-tone-bad-bg: var(--tone-bad-bg);
+  --color-tone-bad-fg: var(--tone-bad-fg);
+  --color-tone-neutral-bg: var(--tone-neutral-bg);
+  --color-tone-neutral-fg: var(--tone-neutral-fg);
+  --color-plan-free: var(--plan-free);
+  --color-plan-pro: var(--plan-pro);
+  --color-plan-team: var(--plan-team);
+  --color-plan-enterprise: var(--plan-enterprise);
+  --color-chart-teams: var(--chart-teams);
+  --color-status-ok: var(--status-ok);
+  --color-table-head: var(--table-head);
+  --color-rule-soft: var(--rule-soft);
   --color-navy: var(--navy);
   --color-navy-foreground: var(--navy-foreground);
   --color-icon-tile: var(--icon-tile);
@@ -53,29 +72,29 @@
 }
 
 :root {
-  --background: oklch(0.97 0.004 264);
-  --foreground: oklch(0.21 0.02 264);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 264);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 264);
-  --primary: oklch(0.55 0.2 260);
+  --background: #F5F6F8;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #2453D6;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.006 264);
-  --secondary-foreground: oklch(0.21 0.02 264);
-  --muted: oklch(0.96 0.006 264);
-  --muted-foreground: oklch(0.5 0.02 264);
-  --accent: oklch(0.94 0.02 260);
-  --accent-foreground: oklch(0.3 0.1 260);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.9 0.006 264);
-  --input: oklch(0.9 0.006 264);
-  --ring: oklch(0.55 0.2 260);
+  --secondary: #EEF0F3;
+  --secondary-foreground: #374151;
+  --muted: #EEF0F3;
+  --muted-foreground: #586174;
+  --accent: #E6ECFB;
+  --accent-foreground: #2453D6;
+  --destructive: #B42318;
+  --border: #E3E6EB;
+  --input: #D8DCE3;
+  --ring: #2453D6;
   --font-sans: var(--font-geist-sans);
-  --navy: oklch(0.28 0.045 258);
+  --navy: #0E1526;
   --navy-foreground: oklch(0.985 0 0);
-  --icon-tile: oklch(0.92 0.035 258);
-  --icon-tile-foreground: oklch(0.5 0.18 260);
+  --icon-tile: #E6ECFB;
+  --icon-tile-foreground: #2453D6;
   /* Validated categorical palette (dataviz six-checks, light surface).
      Both modes pass; light slots 3/4 sit under 3:1, so slices carry
      direct labels + a legend with values rather than relying on hue. */
@@ -84,7 +103,26 @@
   --chart-3: #1baf7a;
   --chart-4: #eda100;
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.875rem;
+  --sidebar-surface: #0E1526;
+  --sidebar-surface-active: #1D2B4D;
+  --sidebar-surface-foreground: #C7CEDB;
+  --sidebar-surface-muted: #8F9BB3;
+  --sidebar-rule: #22304F;
+  --tone-good-bg: #E8F6EE;
+  --tone-good-fg: #146C3A;
+  --tone-bad-bg: #FDECEC;
+  --tone-bad-fg: #B42318;
+  --tone-neutral-bg: #EEF0F3;
+  --tone-neutral-fg: #374151;
+  --plan-free: #A9B4C7;
+  --plan-pro: #2453D6;
+  --plan-team: #E07A1F;
+  --plan-enterprise: #D8DCE3;
+  --chart-teams: #0F8A5F;
+  --status-ok: #3DD68C;
+  --table-head: #FAFBFC;
+  --rule-soft: #EEF0F3;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
